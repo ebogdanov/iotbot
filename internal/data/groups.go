@@ -218,7 +218,7 @@ func (g *Groups) Delete(groupID string) bool {
 	res, err := tx.Exec("DELETE FROM membership WHERE id_group = $1", groupID)
 
 	if err == nil {
-		res, err = tx.Exec("DELETE FROM groups WHERE id = $1", groupID)
+		res, _ = tx.Exec("DELETE FROM groups WHERE id = $1", groupID)
 	}
 	cnt, err := res.RowsAffected()
 	if err != nil {

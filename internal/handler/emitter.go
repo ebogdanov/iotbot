@@ -53,6 +53,10 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 			menuItems = append(menuItems, handlerItems...)
 		}
 
+		if res != nil {
+			continue
+		}
+
 		if !c.h[i].Supported(cmd) {
 			continue
 		}
@@ -75,8 +79,6 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 
 			res = c.h[i].Execute(ctx, cmd, userID, user)
 			c.s.Actions.Add(userID, cmd, c.h[i].Name(), true)
-			break
-
 		}
 	}
 
@@ -93,6 +95,11 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 
 		if len(menuItems) > 0 {
 			res = &result.MainMenu{Msg: "Не понял команды, вот что я умею", Actions: menuItems}
+		}
+	} else {
+		// Return menu in case of success
+		if v, ok := res.(*result.Success); ok {
+			res = &result.MainMenu{Msg: v.Msg, Actions: menuItems}
 		}
 	}
 
