@@ -5,6 +5,7 @@ import (
 	"github.com/ebogdanov/ewelink"
 	"strconv"
 	"su27bot/internal/model"
+	"sync"
 	"time"
 )
 
@@ -15,6 +16,7 @@ type EwelinkWebSocket struct {
 	username string
 	password string
 	region   string
+	m        *sync.Mutex
 }
 
 func NewEwelinkWebsocket(region, userName, password string) *EwelinkWebSocket {
@@ -25,15 +27,23 @@ func NewEwelinkWebsocket(region, userName, password string) *EwelinkWebSocket {
 		username: userName,
 		password: password,
 		region:   region,
+		m:        &sync.Mutex{},
 	}
 }
+
+const (
+	networkTimeout = 15 * time.Second
+)
 
 func (e *EwelinkWebSocket) DeviceInfo(ctx context.Context, ID string) (*model.DeviceResponse, error) {
 	if err := e.auth(); err != nil {
 		return nil, err
 	}
 
-	info, err := e.client.GetDevice(ctx, e.session, ID)
+	ctx1, cancel := context.WithTimeout(ctx, networkTimeout)
+	defer func() { cancel() }()
+
+	info, err := e.client.GetDevice(ctx1, e.session, ID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +74,10 @@ func (e *EwelinkWebSocket) DeviceList(ctx context.Context) (*model.DeviceList, e
 		return nil, err
 	}
 
-	devices, err := e.client.GetDevices(ctx, e.session)
+	ctx1, cancel := context.WithTimeout(ctx, networkTimeout)
+	defer func() { cancel() }()
+
+	devices, err := e.client.GetDevices(ctx1, e.session)
 	if err != nil {
 		return nil, err
 	}
@@ -113,8 +126,8 @@ func (e *EwelinkWebSocket) Scenarios(_ context.Context, _ string) (*model.Scenar
 }
 
 func (e *EwelinkWebSocket) StartScenario(ctx context.Context, homeId, scenarioId string) (bool, error) {
-	ctx1, cancelFunc := context.WithTimeout(ctx, 15*time.Second)
-	defer func() { cancelFunc() }()
+	ctx1, cancel := context.WithTimeout(ctx, networkTimeout)
+	defer func() { cancel() }()
 
 	if err := e.auth(); err != nil {
 		return false, err
@@ -135,10 +148,16 @@ func (e *EwelinkWebSocket) ScenarioInfo(_ context.Context, _, _ string) (*model.
 	return nil, nil
 }
 
-func (e *EwelinkWebSocket) Actions(ctx context.Context) ([]Action, error) {
+func (e *EwelinkWebSocket) Actions(ctx context.Context, supported []string) ([]Action, error) {
+	e.m.Lock()
+	defer e.m.Unlock()
+
 	if len(e.actions) != 0 {
 		return e.actions, nil
 	}
+
+	ctx1, cancel := context.WithTimeout(ctx, networkTimeout)
+	defer func() { cancel() }()
 
 	// List devices
 	if err := e.auth(); err != nil {
@@ -146,15 +165,17 @@ func (e *EwelinkWebSocket) Actions(ctx context.Context) ([]Action, error) {
 	}
 
 	e.actions = make([]Action, 0)
-	devices, err := e.client.GetDevices(ctx, e.session)
+	devices, err := e.client.GetDevices(ctx1, e.session)
 	if err == nil {
 		for i := range devices.Devicelist {
-			e.actions = append(e.actions, Action{
-				ID:       devices.Devicelist[i].ID,
-				Name:     devices.Devicelist[i].Name,
-				HomeID:   devices.Devicelist[i].Uiid,
-				DeviceID: devices.Devicelist[i].DeviceID,
-			})
+			if contains(supported, devices.Devicelist[i].Name) {
+				e.actions = append(e.actions, Action{
+					ID:       devices.Devicelist[i].ID,
+					Name:     devices.Devicelist[i].Name,
+					HomeID:   devices.Devicelist[i].Uiid,
+					DeviceID: devices.Devicelist[i].DeviceID,
+				})
+			}
 		}
 	}
 

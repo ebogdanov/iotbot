@@ -10,30 +10,42 @@ const (
 )
 
 type Invite struct {
-	Success     bool
 	InviteId    string
 	BotUserName string
 }
 
-func (i *Invite) Render() *tgbotapi.MessageConfig {
+func (i *Invite) Render(chatID int64) tgbotapi.Chattable {
 	inviteLink := fmt.Sprintf("https://t.me/%s?start=%s", i.BotUserName, i.InviteId)
 
 	msg := &tgbotapi.MessageConfig{
 		Text: fmt.Sprintf(
 			"Отправьте уникальную одноразовую ссылку новому пользователю: %s", inviteLink),
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
 
 	return msg
 }
 
 type InviteError struct {
-	Success bool
-	Msg     string
-	User    string
+	Msg  string
+	User string
 }
 
-func (i *InviteError) Render() *tgbotapi.MessageConfig {
+func (i *InviteError) Render(chatID int64) tgbotapi.Chattable {
 	return &tgbotapi.MessageConfig{
-		Text: fmt.Sprintf(i.Msg, i.User),
+		Text:     fmt.Sprintf(i.Msg, i.User),
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
+	}
+}
+
+type InviteSuccess struct {
+	Msg  string
+	User string
+}
+
+func (i *InviteSuccess) Render(chatID int64) tgbotapi.Chattable {
+	return &tgbotapi.MessageConfig{
+		Text:     fmt.Sprintf(i.Msg, i.User),
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
 }

@@ -9,8 +9,11 @@ type Fail struct {
 	Msg     string
 }
 
-func (f *Fail) Render() *tgbotapi.MessageConfig {
-	return &tgbotapi.MessageConfig{
-		Text: f.Msg,
+func (f *Fail) Render(chatID int64) tgbotapi.Chattable {
+	msg := &tgbotapi.MessageConfig{
+		Text:     f.Msg,
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
+
+	return msg
 }

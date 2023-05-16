@@ -4,11 +4,13 @@ go 1.19
 
 require (
 	github.com/ebogdanov/ewelink v0.0.0-20230428141713-5272d8dfa59a
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
+	github.com/lib/pq v1.10.9
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/py60800/tuya v0.0.0-20191029172724-8e4512ca366f
 	github.com/rs/zerolog v1.28.0
 	github.com/tuya/tuya-connector-go v1.0.5
-	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53
 	gopkg.in/yaml.v2 v2.2.8
 )
 

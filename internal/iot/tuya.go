@@ -12,11 +12,13 @@ import (
 	"strconv"
 	"su27bot/internal/config"
 	"su27bot/internal/model"
+	"sync"
 )
 
 type Tuya struct {
 	actions []Action
 	UserId  string
+	m       *sync.Mutex
 }
 
 func NewTuyaClient(apiUrl, msgUrl string, cfg *config.Tuya) *Tuya {
@@ -32,7 +34,7 @@ func NewTuyaClient(apiUrl, msgUrl string, cfg *config.Tuya) *Tuya {
 		env.WithAccessKey(cfg.AccessKey),
 		env.WithDebugMode(false))
 
-	return &Tuya{UserId: cfg.UserId}
+	return &Tuya{UserId: cfg.UserId, m: &sync.Mutex{}}
 }
 
 func (c *Tuya) DeviceInfo(ctx context.Context, deviceId string) (*model.DeviceResponse, error) {
@@ -114,7 +116,10 @@ func (c *Tuya) ScenarioInfo(ctx context.Context, homeId, scenarioId string) (*mo
 	return nil, err
 }
 
-func (c *Tuya) Actions(ctx context.Context) ([]Action, error) {
+func (c *Tuya) Actions(ctx context.Context, supported []string) ([]Action, error) {
+	c.m.Lock()
+	defer c.m.Unlock()
+
 	if len(c.actions) != 0 {
 		return c.actions, nil
 	}
@@ -140,12 +145,14 @@ func (c *Tuya) Actions(ctx context.Context) ([]Action, error) {
 		}
 
 		for _, scene := range scenarios.Result {
-			c.actions = append(c.actions, Action{
-				ID:       scene.SceneId,
-				HomeID:   home.HomeId,
-				Name:     scene.Name,
-				DeviceID: scene.Actions[0].EntityId,
-			})
+			if contains(supported, scene.Name) {
+				c.actions = append(c.actions, Action{
+					ID:       scene.SceneId,
+					HomeID:   home.HomeId,
+					Name:     scene.Name,
+					DeviceID: scene.Actions[0].EntityId,
+				})
+			}
 		}
 	}
 

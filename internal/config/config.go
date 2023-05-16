@@ -6,14 +6,18 @@ import (
 )
 
 type Config struct {
-	filePath string
-
+	Db       *Db       `yaml:"db"`
 	Tuya     *Tuya     `yaml:"tuya,omitempty"`
 	Ewelink  *Ewelink  `yaml:"ewelink,omitempty"`
 	Telegram *Telegram `yaml:"telegram"`
 	Acl      *Acl      `yaml:"acl"`
 	Stickers []string  `yaml:"stickers,omitempty"`
 	Qr       *Qr       `yaml:"qr"`
+}
+
+type Db struct {
+	Driver     string `yaml:"driver"`
+	Connection string `yaml:"connection"`
 }
 
 type Tuya struct {
@@ -33,9 +37,6 @@ type Telegram struct {
 }
 
 type Acl struct {
-	Users   map[string]string   `yaml:"users,omitempty"`
-	Groups  map[string][]string `yaml:"groups,omitempty"`
-	Invites []string            `yaml:"invites,omitempty"`
 	Actions struct {
 		Allow []string            `yaml:"allow"`
 		Only  map[string][]string `yaml:"only,omitempty"`
@@ -43,16 +44,9 @@ type Acl struct {
 }
 
 type Qr struct {
-	Enable bool   `yaml:"enable,omitempty"`
-	Cmd    string `yaml:"cmd"`
-	Codes  []Code `yaml:"codes,omitempty"`
-}
-
-type Code struct {
-	User  string `yaml:"user"`
-	Title string `yaml:"title"`
-	Code  string `yaml:"code"`
-	Times int    `yaml:"times"`
+	Enable     bool   `yaml:"enable,omitempty"`
+	Cmd        string `yaml:"cmd"`
+	AllowCodes bool   `yaml:"allow_codes,omitempty"`
 }
 
 // New returns a new decoded Config struct
@@ -62,21 +56,10 @@ func New(configPath string) (*Config, error) {
 	if err == nil {
 		defer func() { _ = file.Close() }()
 
-		config = &Config{
-			filePath: configPath,
-		}
+		config = &Config{}
 
 		err = yaml.NewDecoder(file).Decode(&config)
 	}
 
 	return config, err
-}
-
-func (c *Config) SaveFile() error {
-	data, err := yaml.Marshal(c)
-	if err == nil {
-		err = os.WriteFile(c.filePath, data, 0644)
-	}
-
-	return err
 }

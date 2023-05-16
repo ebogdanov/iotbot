@@ -12,5 +12,15 @@ type Provider interface {
 	Scenarios(context.Context, string) (*model.ScenariosResponse, error)
 	StartScenario(context.Context, string, string) (bool, error)
 	ScenarioInfo(context.Context, string, string) (*model.DeviceItem, error)
-	Actions(context.Context) ([]Action, error)
+	Actions(context.Context, []string) ([]Action, error)
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
 }

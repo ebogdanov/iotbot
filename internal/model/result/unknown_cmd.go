@@ -9,16 +9,17 @@ type UnknownCmd struct {
 	UserID  string
 }
 
-func (u *UnknownCmd) Render() *tgbotapi.MessageConfig {
+func (u *UnknownCmd) Render(chatID int64) tgbotapi.Chattable {
 	menu := &MainMenu{
 		UserID: u.UserID,
 	}
 
 	msg := tgbotapi.MessageConfig{
-		Text: "Не понял команды, вот что я умею делать",
+		Text:     "Не понял команды, вот что я умею делать",
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
 
-	msg.ReplyMarkup = menu.Render()
+	msg.ReplyMarkup = menu.Render(chatID)
 
 	return &msg
 }

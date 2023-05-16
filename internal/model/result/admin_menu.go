@@ -8,15 +8,22 @@ const (
 	MenuAdmin = "MENU_ADMIN"
 	MenuMain  = "MENU_MAIN"
 
-	MenuUsers   = "MENU_ADMIN_USERS"
-	MenuGroups  = "MENU_ADMIN_GROUPS"
-	MenuInvites = "MENU_ADMIN_INVITES"
+	MenuUsers = "MENU_ADMIN_USERS"
+
+	MenuGroups = "MENU_ADMIN_GROUPS"
 
 	UserList   = "ADMIN_USER_LIST"
 	UserDelete = "ADMIN_USER_DELETE"
+	UserView   = "ADMIN_USER_VIEW"
 
-	GroupsList       = "ADMIN_GROUP_LIST"
-	GroupPermissions = "ADMIN_GROUP_PERMISSIONS"
+	ActionsLast = "ADMIN_LAST_ACTIONS"
+
+	GroupsList        = "ADMIN_GROUP_LIST"
+	GroupDelete       = "ADMIN_GROUP_DELETE"
+	GroupMemberDelete = "ADMIN_GROUP_MEMBER_DELETE"
+	GroupMemberAdd    = "ADMIN_GROUP_MEMBER_ADD"
+	GroupMenuAdd      = "ADMIN_GROUP_MENU_ADD"
+	GroupView         = "ADMIN_GROUP_VIEW"
 )
 
 type AdminMenu struct {
@@ -25,9 +32,10 @@ type AdminMenu struct {
 	Section string
 }
 
-func (a *AdminMenu) Render() *tgbotapi.MessageConfig {
+func (a *AdminMenu) Render(chatID int64) tgbotapi.Chattable {
 	msg := &tgbotapi.MessageConfig{
-		Text: a.Msg,
+		Text:     a.Msg,
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
 
 	menu := tgbotapi.NewInlineKeyboardMarkup()
@@ -41,63 +49,41 @@ func (a *AdminMenu) Render() *tgbotapi.MessageConfig {
 			// Submenu - groups
 			tgbotapi.NewInlineKeyboardButtonData("👤 Группы", MenuGroups),
 		), tgbotapi.NewInlineKeyboardRow(
-			// Submenu - invites
-			tgbotapi.NewInlineKeyboardButtonData("✉️ Приглашения", MenuInvites),
-		), tgbotapi.NewInlineKeyboardRow(
 			// Submenu - exit
 			tgbotapi.NewInlineKeyboardButtonData("◀️ Назад", MenuMain),
 		))
 
 	case MenuUsers:
+		msg.Text += " (пользователи)"
 		// Список пользователей
 		menu.InlineKeyboard = append(menu.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
+			// Список
+			tgbotapi.NewInlineKeyboardButtonData("Список", UserList),
+		), tgbotapi.NewInlineKeyboardRow(
+			// Список последних действия
+			tgbotapi.NewInlineKeyboardButtonData("Последние 20 действий", ActionsLast),
+		), tgbotapi.NewInlineKeyboardRow(
 			// Добавить пользователя
 			tgbotapi.NewInlineKeyboardButtonData("Пригласить", InviteGenerate),
 		), tgbotapi.NewInlineKeyboardRow(
-			// Список
-			tgbotapi.NewInlineKeyboardButtonData("Список", UserList), // @todo
-		), tgbotapi.NewInlineKeyboardRow(
-			// Список последних действия
-			tgbotapi.NewInlineKeyboardButtonData("Последние 10 записей", "LAST_ACTIONS"), // @todo
-		), tgbotapi.NewInlineKeyboardRow(
-			// Удалить пользователя
-			tgbotapi.NewInlineKeyboardButtonData("Удалить", UserDelete), // @todo
-		), tgbotapi.NewInlineKeyboardRow(
 			// В главное меню
-			tgbotapi.NewInlineKeyboardButtonData("Назад", MenuAdmin),
+			tgbotapi.NewInlineKeyboardButtonData("◀️ Назад", MenuAdmin),
 		))
 
 	case MenuGroups:
+		msg.Text += " (группы)"
+
 		// Список групп
 		menu.InlineKeyboard = append(menu.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
 			// Список
 			tgbotapi.NewInlineKeyboardButtonData("Список", GroupsList),
 		), tgbotapi.NewInlineKeyboardRow(
-			// Список последних действий
-			tgbotapi.NewInlineKeyboardButtonData("Разрешения", GroupPermissions), // @todo
-		), tgbotapi.NewInlineKeyboardRow(
 			// В главное меню
-			tgbotapi.NewInlineKeyboardButtonData("Назад", MenuAdmin),
-		))
-
-	case MenuInvites:
-		// Список приглашений
-		menu.InlineKeyboard = append(menu.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-			// Добавить пользователя
-			tgbotapi.NewInlineKeyboardButtonData("Пригласить", InviteGenerate),
-		), tgbotapi.NewInlineKeyboardRow(
-			// Список
-			tgbotapi.NewInlineKeyboardButtonData("Список", "INVITE_LIST"), // @todo
-		), tgbotapi.NewInlineKeyboardRow(
-			// Список последних действий
-			tgbotapi.NewInlineKeyboardButtonData("Удалить все", "CLEAR_INVITES"), // @todo
-		), tgbotapi.NewInlineKeyboardRow(
-			// В главное меню
-			tgbotapi.NewInlineKeyboardButtonData("Назад", MenuAdmin),
+			tgbotapi.NewInlineKeyboardButtonData("◀️ Назад", MenuAdmin),
 		))
 	}
 
-	msg.ReplyMarkup = menu
+	msg.ReplyMarkup = &menu
 
 	return msg
 }

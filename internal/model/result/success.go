@@ -8,14 +8,15 @@ type Success struct {
 	Msg     string
 }
 
-func (s *Success) Render() *tgbotapi.MessageConfig {
+func (s *Success) Render(chatID int64) tgbotapi.Chattable {
 	menu := &MainMenu{UserID: s.User}
 
 	msg := &tgbotapi.MessageConfig{
-		Text: s.Msg,
+		Text:     s.Msg,
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID, DisableNotification: true},
 	}
 
-	msg.ReplyMarkup = menu.Render()
+	msg.ReplyMarkup = menu.Render(chatID)
 
 	return msg
 }

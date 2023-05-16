@@ -17,9 +17,10 @@ type MainMenu struct {
 	Actions   []MenuItem
 }
 
-func (m *MainMenu) Render() *tgbotapi.MessageConfig {
+func (m *MainMenu) Render(chatID int64) tgbotapi.Chattable {
 	msg := &tgbotapi.MessageConfig{
-		Text: m.Msg,
+		Text:     m.Msg,
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
 
 	menu := tgbotapi.NewInlineKeyboardMarkup()
@@ -36,7 +37,9 @@ func (m *MainMenu) Render() *tgbotapi.MessageConfig {
 		))
 	}
 
-	msg.ReplyMarkup = menu
+	if len(menu.InlineKeyboard) > 0 {
+		msg.ReplyMarkup = menu
+	}
 
 	return msg
 }

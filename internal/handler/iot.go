@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	nfcPrefix = "/start NFC:"
+	IotCmdPrefix = "DO_"
 )
 
 type Iot struct {
@@ -22,9 +22,7 @@ func NewIot(p iot.Provider, a *acl.Default) *Iot {
 }
 
 func (i *Iot) Supported(cmd string) bool {
-	cmd = strings.Replace(cmd, nfcPrefix, "", 1) // Support of message from NFC tag
-
-	items, err := i.provider.Actions(context.Background())
+	items, err := i.provider.Actions(context.Background(), []string{})
 	if err == nil {
 		for _, c := range items {
 			if c.MenuId() == cmd {
@@ -41,24 +39,27 @@ func (i *Iot) Supported(cmd string) bool {
 }
 
 func (i *Iot) Allowed(cmd, userID string) (bool, error) {
-	cmd = strings.Replace(cmd, nfcPrefix, "", 1) // Support of message from NFC tag
-
-	if i.a.IsAllowed(userID, cmd) {
-		return true, nil
-	}
-
-	items, err := i.provider.Actions(context.Background())
-	if err != nil {
-		return false, nil
-	}
-
-	for _, c := range items {
-		if c.MenuId() == cmd {
+	// Check that this is Direct text
+	switch strings.HasPrefix(cmd, IotCmdPrefix) {
+	case false:
+		if i.a.IsAllowed(userID, cmd) {
 			return true, nil
 		}
+	case true:
+		// Ok, this is the button press event
+		items, err := i.provider.Actions(context.Background(), []string{})
+		if err != nil {
+			return false, nil
+		}
 
-		if c.Name == cmd {
-			return true, nil
+		for _, c := range items {
+			if c.MenuId() == cmd {
+				return i.a.IsAllowed(userID, c.Name), nil
+			}
+
+			if c.Name == cmd {
+				return i.a.IsAllowed(userID, c.Name), nil
+			}
 		}
 	}
 
@@ -66,13 +67,11 @@ func (i *Iot) Allowed(cmd, userID string) (bool, error) {
 }
 
 func (i *Iot) Execute(ctx context.Context, cmd, userId, user string) result.Message {
-	// @todo: Count limit for this user per hour (20)
-
 	// Check that this is allowed
 	parts := strings.Split(cmd, "_")
-	if len(parts) != 3 {
+	if len(parts) < 3 {
 		// Try to find this id (maybe user sent us text command)
-		items, err := i.provider.Actions(ctx)
+		items, err := i.provider.Actions(ctx, []string{})
 
 		if err == nil {
 			for _, c := range items {
@@ -84,13 +83,13 @@ func (i *Iot) Execute(ctx context.Context, cmd, userId, user string) result.Mess
 				}
 			}
 		}
-
-		if len(parts) != 3 {
-			return &result.Fail{Msg: "Invalid request"}
-		}
 	}
 
-	acts, err := i.provider.Actions(ctx)
+	if len(parts) < 3 {
+		return &result.Fail{Msg: "Invalid request"}
+	}
+
+	acts, err := i.provider.Actions(ctx, []string{})
 	if err != nil {
 		return &result.Fail{Msg: "Invalid request"}
 	}
@@ -122,9 +121,13 @@ func (i *Iot) Execute(ctx context.Context, cmd, userId, user string) result.Mess
 	return &result.Success{Success: res, Msg: "Успешно выполнено, жду приказов"}
 }
 
+func (a *Iot) Name() string {
+	return "iot"
+}
+
 func (i *Iot) Menu(userID string) []result.MenuItem {
 	items := make([]result.MenuItem, 0)
-	actions, err := i.provider.Actions(context.Background())
+	actions, err := i.provider.Actions(context.Background(), []string{})
 
 	if err != nil {
 		return items

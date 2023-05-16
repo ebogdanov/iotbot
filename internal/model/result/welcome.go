@@ -12,12 +12,13 @@ type Welcome struct {
 	User    string
 }
 
-func (w *Welcome) Render() *tgbotapi.MessageConfig {
+func (w *Welcome) Render(chatID int64) tgbotapi.Chattable {
 	menu := &MainMenu{UserID: w.User}
 	msg := &tgbotapi.MessageConfig{
-		Text: fmt.Sprintf(w.Msg, w.User),
+		Text:     fmt.Sprintf(w.Msg, w.User),
+		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
-	msg.ReplyMarkup = menu.Render()
+	msg.ReplyMarkup = menu.Render(chatID)
 
 	return msg
 }

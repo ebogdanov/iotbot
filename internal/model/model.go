@@ -38,51 +38,6 @@ type DeviceResponse struct {
 	T       int64       `json:"t"`
 }
 
-/*
-{
-  "result": {
-    "active_time": 1665067716,
-    "biz_type": 18,
-    "category": "cz",
-    "create_time": 1654780109,
-    "icon": "smart/icon/ay15327721968035jwx9/51cdfae81ca1085222339839555877be.jpg",
-    "id": "73634132ec94cb805467",
-    "ip": "87.117.63.134",
-    "lat": "47.2182",
-    "local_key": "485aff867bf748a6",
-    "lon": "39.7043",
-    "model": "",
-    "name": "Детская площадка (гирлянда)",
-    "online": false,
-    "owner_id": "58738965",
-    "product_id": "cqe62kcfp6vyhmsu",
-    "product_name": "NH-YM-8285-101 onboard",
-    "status": [
-      {
-        "code": "switch_1",
-        "value": false
-      },
-      {
-        "code": "countdown_1",
-        "value": 0
-      },
-      {
-        "code": "relay_status",
-        "value": "last"
-      }
-    ],
-    "sub": false,
-    "time_zone": "+03:00",
-    "uid": "eu1654779289908FAwwK",
-    "update_time": 1665067720,
-    "uuid": "73634132ec94cb805467"
-  },
-  "success": true,
-  "t": 1671655476575,
-  "tid": "481e27d2817011edbff6521277a1eee7"
-}
-*/
-
 type DeviceList struct {
 	Result struct {
 		LastRowKey string   `json:"last_row_key,omitempty"`
