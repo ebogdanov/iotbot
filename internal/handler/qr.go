@@ -39,10 +39,14 @@ type Qr struct {
 }
 
 func NewQr(u *data.Storage, cfg *config.Config, h []Handler) *Qr {
+	cmd := ""
+	if cfg.Qr != nil {
+		cmd = cfg.Qr.Cmd
+	}
 	return &Qr{
 		s:   u,
 		cfg: cfg,
-		cmd: cfg.Qr.Cmd,
+		cmd: cmd,
 		h:   h,
 	}
 }
@@ -62,7 +66,7 @@ func (q *Qr) Allowed(cmd, userID string) (bool, error) {
 		return true, nil
 	}
 
-	if q.cfg.Qr.AllowCodes {
+	if q.cfg.Qr != nil && q.cfg.Qr.AllowCodes {
 		if regExp46Digits.MatchString(cmd) && !q.s.Users.Check(userID) {
 			return true, nil
 		}
@@ -92,7 +96,7 @@ func (q *Qr) Execute(ctx context.Context, cmd, userID, user string) result.Messa
 		}
 
 		// If not - enter code
-		if !q.cfg.Qr.Enable {
+		if q.cfg.Qr != nil && !q.cfg.Qr.Enable {
 			return &result.QrHelp{}
 		}
 

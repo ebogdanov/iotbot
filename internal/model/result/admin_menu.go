@@ -22,7 +22,6 @@ const (
 	GroupDelete       = "ADMIN_GROUP_DELETE"
 	GroupMemberDelete = "ADMIN_GROUP_MEMBER_DELETE"
 	GroupMemberAdd    = "ADMIN_GROUP_MEMBER_ADD"
-	GroupMenuAdd      = "ADMIN_GROUP_MENU_ADD"
 	GroupView         = "ADMIN_GROUP_VIEW"
 )
 

@@ -34,10 +34,9 @@ func Factory(cfg *config.Config, rules *acl.Default, storage *data.Storage, log 
 		handlers = append(handlers, NewIot(ewelinkClient, rules))
 	}
 
-	if cfg.Qr.Enable {
-		qrHandler := NewQr(storage, cfg, handlers)
-		handlers = append(handlers, qrHandler)
-	}
+	qrHandler := NewQr(storage, cfg, handlers)
+	handlers = append(handlers, qrHandler)
+
 	handlers = append(handlers, NewAdmin(storage))
 
 	return handlers

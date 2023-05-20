@@ -19,20 +19,19 @@ type AdminViewUser struct {
 
 func (a *AdminViewUser) Render(chatID int64) tgbotapi.Chattable {
 	const (
-		mask = "%s: %s - %s(%s), %v \n"
+		mask = "%s: %s(%s), %v \n"
 	)
 
 	text := fmt.Sprintf("Пользователь: %s (%v) \n\n", a.UserName, a.Active)
 
 	for _, item := range a.Actions {
-		text += fmt.Sprintf(mask, item.EventTime, item.User, item.Cmd, item.HandlerName, item.Result)
+		text += fmt.Sprintf(mask, item.EventTime, item.Cmd, item.HandlerName, item.Result)
 	}
 	text += "\n\nГруппы:\n"
 
 	menu := tgbotapi.NewInlineKeyboardMarkup()
 
 	for id, item := range a.Groups {
-
 		if contains(a.MemberOf, item) {
 			if item == "admin" {
 				menu.InlineKeyboard = append(menu.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
@@ -55,10 +54,15 @@ func (a *AdminViewUser) Render(chatID int64) tgbotapi.Chattable {
 		BaseChat: tgbotapi.BaseChat{ChatID: chatID},
 	}
 
-	menu.InlineKeyboard = append(menu.InlineKeyboard, tgbotapi.NewInlineKeyboardRow(
-		// В меню пользователей
-		tgbotapi.NewInlineKeyboardButtonData("◀️ Назад в меню", a.Previous),
-	))
+	menu.InlineKeyboard = append(menu.InlineKeyboard,
+		tgbotapi.NewInlineKeyboardRow(
+			// Удалить пользователя
+			tgbotapi.NewInlineKeyboardButtonData("❌ Удалить пользователя", UserDelete+"_"+a.UserID),
+		),
+		tgbotapi.NewInlineKeyboardRow(
+			// В меню пользователей
+			tgbotapi.NewInlineKeyboardButtonData("◀️ Назад в меню", a.Previous),
+		))
 
 	msg.ReplyMarkup = menu
 

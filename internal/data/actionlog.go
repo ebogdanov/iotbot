@@ -84,8 +84,43 @@ func (i *ActionLog) Count(cmd, userID string) int {
 
 func (i *ActionLog) List(limit int) ([]Action, error) {
 	res, err := i.db.Conn.Query(
-		"SELECT actions.user_id, cmd, handler, result, execute_time, users.name FROM actions LEFT JOIN users on actions.user_id = users.user_id ORDER BY actions.id DESC LIMIT $1",
-		limit)
+		"SELECT actions.user_id, cmd, handler, result, execute_time, users.name FROM actions LEFT JOIN users on actions.user_id = users.user_id WHERE actions.handler != $2 ORDER BY actions.id DESC LIMIT $1",
+		limit, "admin")
+
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = res.Close() }()
+
+	if res.Err() != nil {
+		return nil, err
+	}
+
+	list := make([]Action, 0)
+	for res.Next() {
+		item := &Action{}
+
+		var (
+			unixTime int64
+		)
+
+		if err := res.Scan(&item.UserID, &item.Cmd, &item.HandlerName, &item.Result, &unixTime, &item.User); err != nil {
+			continue
+		}
+
+		dateTime := time.Unix(unixTime, 0)
+		item.EventTime = dateTime.Format(time.RFC822)
+
+		list = append(list, *item)
+	}
+
+	return list, nil
+}
+
+func (i *ActionLog) ListGroup(limit int, group string) ([]Action, error) {
+	res, err := i.db.Conn.Query(
+		"SELECT actions.user_id, cmd, handler, result, execute_time, users.name FROM actions LEFT JOIN users on actions.user_id = users.user_id WHERE actions.handler = $2 ORDER BY actions.id DESC LIMIT $1",
+		limit, group)
 
 	if err != nil {
 		return nil, err

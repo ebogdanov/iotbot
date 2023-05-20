@@ -18,7 +18,11 @@ func (a *ActionList) Render(chatID int64) tgbotapi.Chattable {
 	mask := "%s: %s - %s(%s), %v \n"
 
 	for _, item := range a.List {
-		text += fmt.Sprintf(mask, item.EventTime, item.User, item.Cmd, item.HandlerName, item.Result)
+		if item.UserID != "" {
+			text += fmt.Sprintf(mask, item.EventTime, "@"+item.User, item.Cmd, item.HandlerName, item.Result)
+		} else {
+			text += fmt.Sprintf(mask, item.EventTime, item.UserID, item.Cmd, item.HandlerName, item.Result)
+		}
 	}
 
 	msg := &tgbotapi.MessageConfig{
