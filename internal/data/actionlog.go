@@ -36,7 +36,7 @@ func (a *ActionLog) Add(userID, cmd, handlerName string, result bool) {
 	}()
 }
 
-func (i *ActionLog) CheckFlood(cmd, userID string) bool {
+func (i *ActionLog) Flood(cmd, userID string) bool {
 	cnt := i.Count(cmd, userID)
 
 	return cnt > floodLimit
@@ -84,8 +84,8 @@ func (i *ActionLog) Count(cmd, userID string) int {
 
 func (i *ActionLog) List(limit int) ([]Action, error) {
 	res, err := i.db.Conn.Query(
-		"SELECT actions.user_id, cmd, handler, result, execute_time, users.name FROM actions LEFT JOIN users on actions.user_id = users.user_id WHERE actions.handler != $2 ORDER BY actions.id DESC LIMIT $1",
-		limit, "admin")
+		"SELECT actions.user_id, cmd, handler, result, execute_time, users.name FROM actions LEFT JOIN users on actions.user_id = users.user_id WHERE actions.handler != $1 ORDER BY actions.id DESC LIMIT $2",
+		"admin", limit)
 
 	if err != nil {
 		return nil, err

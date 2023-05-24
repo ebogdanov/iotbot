@@ -73,7 +73,7 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 
 		if ok {
 			// Flood control goes here
-			if !c.s.Groups.IsAdmin(userID) && c.s.Actions.CheckFlood(cmd, userID) {
+			if !c.s.Groups.IsAdmin(userID) && c.s.Actions.Flood(cmd, userID) {
 				break
 			}
 
@@ -99,7 +99,7 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 	} else {
 		// Return menu in case of success
 		if v, ok := res.(*result.Success); ok {
-			res = &result.MainMenu{Msg: v.Msg, Actions: menuItems}
+			res = &result.MainMenu{Msg: v.Msg, Actions: menuItems, UserID: userID}
 		}
 	}
 

@@ -73,7 +73,7 @@ func (a *Admin) RegisterByInvite(cmd, userId, user string) (result.Message, erro
 	menuItems := []result.MenuItem{{ID: "Далее-" + time.Now().String(), Title: "Далее", Icon: `⏩`}}
 	text := fmt.Sprintf(welcomeSuccess, user)
 
-	return &result.MainMenu{Msg: text, Actions: menuItems}, nil
+	return &result.MainMenu{Msg: text, Actions: menuItems, UserID: userId}, nil
 }
 
 func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Message {
