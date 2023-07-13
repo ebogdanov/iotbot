@@ -22,8 +22,11 @@ func NewClient(token string, l zerolog.Logger) (*Client, error) {
 		logger: l.With().Str("client", "telegram").Logger(),
 	}
 	bot, err := tgbotapi.NewBotAPI(token)
-	bot.Debug = false
+	if err != nil {
+		return client, err
+	}
 
+	bot.Debug = false
 	client.bot = bot
 	return client, err
 }
@@ -46,8 +49,6 @@ func (c *Client) processUpdate(h handler.Emitter, update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(0, "")
 
 	if update.Message != nil {
-		c.logger.Debug().Interface("update.message", update.Message).Msg("Incoming request")
-
 		if time.Since(update.Message.Time()) > acceptWindow {
 			c.logger.Debug().
 				Time("time", update.Message.Time()).
@@ -56,6 +57,8 @@ func (c *Client) processUpdate(h handler.Emitter, update tgbotapi.Update) {
 
 			return
 		}
+
+		c.logger.Debug().Interface("update.message", update.Message).Msg("Incoming request")
 
 		cmd = update.Message.Text
 		userName = c.getFromUserMessage(update.Message.From)

@@ -11,7 +11,6 @@ import (
 	"su27bot/internal/config"
 	"su27bot/internal/data"
 	"su27bot/internal/model/result"
-	"time"
 )
 
 const (
@@ -275,7 +274,7 @@ func (q *Qr) executeAction(ctx context.Context, cmd, userID, user string) result
 		return res
 	}
 
-	return &result.Fail{Msg: "Ошибка конфигурации. Action не найден"}
+	return &result.Fail{Msg: result.HelpText}
 }
 
 func (q *Qr) Name() string {
@@ -284,8 +283,6 @@ func (q *Qr) Name() string {
 
 func randomCode(n int) string {
 	chars := []rune("0123456789")
-
-	rand.Seed(time.Now().UnixNano())
 
 	b := make([]rune, n)
 	for i := range b {

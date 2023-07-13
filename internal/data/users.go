@@ -77,6 +77,19 @@ func (u *Users) Info(userID string) (string, string, bool, error) {
 	return "", "", false, err
 }
 
+func (u *Users) UpdateName(userID, name string) bool {
+	res, err := u.db.Conn.Exec("UPDATE users SET name = $1 WHERE user_id = $2", name, userID)
+	if err != nil {
+		return false
+	}
+	cnt, err := res.RowsAffected()
+	if err != nil {
+		return false
+	}
+
+	return cnt > 0
+}
+
 func (u *Users) Name(userID string) string {
 	res, err := u.db.Conn.Query(
 		"SELECT name FROM users WHERE user_id = $1 LIMIT 1", userID)

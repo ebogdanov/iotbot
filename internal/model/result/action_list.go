@@ -1,6 +1,7 @@
 package result
 
 import (
+	"bytes"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"su27bot/internal/data"
@@ -18,10 +19,13 @@ func (a *ActionList) Render(chatID int64) tgbotapi.Chattable {
 	mask := "%s: %s - %s(%s), %v \n"
 
 	for _, item := range a.List {
-		if item.UserID != "" {
-			text += fmt.Sprintf(mask, item.EventTime, "@"+item.User, item.Cmd, item.HandlerName, item.Result)
+		validUtf8 := bytes.ToValidUTF8([]byte(item.Cmd), []byte{0xef, 0xbf, 0xbd})
+		item.Cmd = string(validUtf8)
+
+		if item.ID == 0 { // user is not registered
+			text += fmt.Sprintf(mask, item.EventTime, "! "+item.User+" !", item.Cmd, item.HandlerName, item.Result)
 		} else {
-			text += fmt.Sprintf(mask, item.EventTime, item.UserID, item.Cmd, item.HandlerName, item.Result)
+			text += fmt.Sprintf(mask, item.EventTime, "@"+item.User, item.Cmd, item.HandlerName, item.Result)
 		}
 	}
 

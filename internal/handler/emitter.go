@@ -53,10 +53,12 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 			menuItems = append(menuItems, handlerItems...)
 		}
 
+		// Just gather menu items from handlers, if we already have found some result
 		if res != nil {
 			continue
 		}
 
+		// Check if cmd is supported and allowed for this user
 		if !c.h[i].Supported(cmd) {
 			continue
 		}
@@ -74,11 +76,12 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 		if ok {
 			// Flood control goes here
 			if !c.s.Groups.IsAdmin(userID) && c.s.Actions.Flood(cmd, userID) {
+				res = &result.Fail{Msg: result.TooOftenText}
 				break
 			}
 
 			res = c.h[i].Execute(ctx, cmd, userID, user)
-			c.s.Actions.Add(userID, cmd, c.h[i].Name(), true)
+			c.s.Actions.Add(userID, user, cmd, c.h[i].Name(), true)
 		}
 	}
 
@@ -86,7 +89,7 @@ func (c *Default) Handle(ctx context.Context, cmd, userID, user string) result.M
 	if res == nil {
 		res = &result.Fail{Msg: result.HelpText}
 
-		c.s.Actions.Add(userID, cmd, "none", false)
+		c.s.Actions.Add(userID, user, cmd, "none", false)
 		cnt := c.s.Actions.Count("*", userID)
 
 		if cnt > 1 {

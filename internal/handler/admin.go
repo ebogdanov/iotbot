@@ -16,7 +16,7 @@ type Admin struct {
 }
 
 const (
-	welcomeSuccess = "Привет, %s.\n\nСпасибо за регистрацию! ❤️\nТеперь ты можешь давать боту команды 👍"
+	welcomeSuccess = "Привет, %s.\n\nСпасибо за регистрацию! ❤️\nТеперь можно давать боту команды 👍"
 	incorrectCode  = "Код приглашения неверный."
 	systemFailure  = "Ошибка системы, попробуйте еще раз попозже"
 )
@@ -82,7 +82,7 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 	}
 
 	switch {
-	// Меню администратора
+	// Admin menu
 	case strings.HasPrefix(cmd, result.MenuAdmin):
 		return &result.AdminMenu{Success: true, Msg: "Выберите действие", Section: cmd}
 
@@ -97,8 +97,21 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 
 		return &result.Invite{InviteId: uid, BotUserName: a.s.BotName}
 
+	// Log of Actions
 	case cmd == result.ActionsLast:
 		list, err := a.s.Actions.List(20)
+		if err != nil {
+			return &result.Fail{Msg: err.Error()}
+		}
+
+		return &result.ActionList{
+			Msg:      "Список действий",
+			List:     list,
+			Previous: result.MenuUsers,
+		}
+
+	case cmd == result.ActionsUnknown:
+		list, err := a.s.Actions.ListUnknown(20)
 		if err != nil {
 			return &result.Fail{Msg: err.Error()}
 		}
@@ -152,7 +165,7 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 
 		return &result.Fail{Msg: "Не удалось загрузить информацию о пользователе"}
 
-		// Удалить пользователя
+	// Delete user
 	case strings.HasPrefix(cmd, result.UserDelete):
 		parts := strings.Split(cmd, "_")
 
@@ -167,7 +180,7 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 			}
 		}
 
-	// Список групп
+	// Groups list
 	case cmd == result.GroupsList:
 		members := a.s.Groups.List()
 
@@ -179,7 +192,7 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 			Previous:     result.MenuGroups,
 		}
 
-		// Удалить группу
+	// Delete group
 	case strings.HasPrefix(cmd, result.GroupDelete):
 		parts := strings.Split(cmd, "_")
 
@@ -194,7 +207,7 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 
 		return &result.Fail{Msg: "Не удалось удалить группу"}
 
-	// Просмотр группы
+	// View group
 	case strings.HasPrefix(cmd, result.GroupView):
 		parts := strings.Split(cmd, "_")
 
@@ -226,7 +239,7 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 		}
 		return &result.Fail{Msg: "Не удалось загрузить информацию о группе"}
 
-	// Добавить пользователя в группу
+	// Add user to group
 	case strings.HasPrefix(cmd, result.GroupMemberAdd):
 		parts := strings.Split(cmd, "_")
 
@@ -240,9 +253,9 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 			}
 		}
 
-		return &result.Fail{Msg: "Не добавить пользователя в группу"}
+		return &result.Fail{Msg: "Не удалось добавить пользователя в группу"}
 
-	// Удалить пользователя из группы
+	// Delete user from group
 	case strings.HasPrefix(cmd, result.GroupMemberDelete):
 		parts := strings.Split(cmd, "_")
 
@@ -258,7 +271,7 @@ func (a *Admin) Execute(_ context.Context, cmd, userId, user string) result.Mess
 			}
 		}
 
-		return &result.Fail{Msg: "Не удалить пользователя из группы"}
+		return &result.Fail{Msg: "Не удалось удалить пользователя из группы"}
 
 	// Invite
 	case strings.HasPrefix(cmd, startInvitePrefix):
@@ -287,8 +300,6 @@ func (a *Admin) Name() string {
 
 func randomString(n int) string {
 	chars := []rune("_123456789abcdefghijklmnpqrstuvwxyzABCDEFGHIJKLMNPRSTUVWXYZ")
-
-	rand.Seed(time.Now().UnixNano())
 
 	b := make([]rune, n)
 	for i := range b {

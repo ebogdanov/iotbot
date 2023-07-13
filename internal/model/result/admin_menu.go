@@ -16,7 +16,8 @@ const (
 	UserDelete = "ADMIN_USER_DELETE"
 	UserView   = "ADMIN_USER_VIEW"
 
-	ActionsLast = "ADMIN_LAST_ACTIONS"
+	ActionsLast    = "ADMIN_LAST_ACTIONS"
+	ActionsUnknown = "ADMIN_LAST_UNKNOWN"
 
 	GroupsList        = "ADMIN_GROUP_LIST"
 	GroupDelete       = "ADMIN_GROUP_DELETE"
@@ -59,11 +60,14 @@ func (a *AdminMenu) Render(chatID int64) tgbotapi.Chattable {
 			// Список
 			tgbotapi.NewInlineKeyboardButtonData("Список", UserList),
 		), tgbotapi.NewInlineKeyboardRow(
+			// Добавить пользователя
+			tgbotapi.NewInlineKeyboardButtonData("Пригласить", InviteGenerate),
+		), tgbotapi.NewInlineKeyboardRow(
 			// Список последних действия
 			tgbotapi.NewInlineKeyboardButtonData("Последние 20 действий", ActionsLast),
 		), tgbotapi.NewInlineKeyboardRow(
-			// Добавить пользователя
-			tgbotapi.NewInlineKeyboardButtonData("Пригласить", InviteGenerate),
+			// Список последних действия
+			tgbotapi.NewInlineKeyboardButtonData("Действия без авторизации", ActionsUnknown),
 		), tgbotapi.NewInlineKeyboardRow(
 			// В главное меню
 			tgbotapi.NewInlineKeyboardButtonData("◀️ Назад", MenuAdmin),

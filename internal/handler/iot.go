@@ -67,7 +67,6 @@ func (i *Iot) Allowed(cmd, userID string) (bool, error) {
 }
 
 func (i *Iot) Execute(ctx context.Context, cmd, userId, user string) result.Message {
-	// Check that this is allowed
 	parts := strings.Split(cmd, "_")
 	if len(parts) < 3 {
 		// Try to find this id (maybe user sent us text command)
