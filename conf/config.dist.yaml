@@ -1,0 +1,36 @@
+tuya: # Tuya Cloud usage is paid action. They offer one month Trial, which can be extended for 6 months
+  access_id: aksgca9pepzxzpezvr3a
+  access_key: 0e0aef4238c39588831c8bd23bcb80337b8f3394
+  user_id: eu1066171009953FAwwK
+ewelink: # There is no need to register API key for Ewelink, you can just use credentials
+  region: eu # Cloud region
+  username: mail@example.com
+  password: ~SuPpAPaSsW0rD~
+telegram: # Register new bot using @BotFather, and enter data in token
+  token_bot: 4504853297:bBqdfDMwtbx-FvxkLtJVoNJlqtMJSzlxvzK
+db: # DB Connection details
+  driver: "sqlite3"
+  connection: "iot"
+acl: # ACL is list of scenarios which can be executed
+  actions:
+    allow:
+      - Включить подсветку
+      - Тест
+    only: # Only is which action can be allowed only for members in Special group
+      shabat:
+        - Открыть калитку
+stickers: # List of stickers which will be sent to unregistered users
+  - CAACAgIAAxkBAAEGA4pjP0rX8-9yQyLXz_A-ryqu7GEFPQACxQMAAnwFBxskz6_qqpE5uSoE
+  - CAACAgIAAxkBAAEGA4xjP0r6KRlR0yZeLANdPDLkisP-DQACuwMAAnwFBxum_5kLmsO3EyoE
+  - CAACAgIAAxkBAAEGA45jP0sPjasYvtUZ9bKMsnr6CTQe1gACoQMAAnwFBxvz_axKdt0ixioE
+  - CAACAgIAAxkBAAEGA5BjP0sr4QABUJMNv496kdoTb94cnxYAAqoDAAJ8BQcb9Q7UH-clYuUqBA
+  - CAACAgIAAxkBAAEGA5JjP0tFvVwNuYktZTp0G-S8r_hKSQACwQMAAnwFBxve9LJfpVrFvCoE
+  - CAACAgIAAxkBAAEGA5RjP0tjfpzUWBs9L_E1ztXpxa96KgACqAMAAkcVaAmonLAZa0aDSioE
+  - CAACAgIAAxkBAAEGA5ZjP0t4akC6oPNFI5TwTZBzNK8wKAACrQMAAkcVaAlF6T5von_smSoE
+  - CAACAgIAAxkBAAEGA5hjP0uQ_Ng9c9D4woBTo0VUv2IEHwACHgADYbCUL8EWLGzIUXFSKgQ
+  - CAACAgIAAxkBAAEGA5pjP0uwkV4-aCV8L4lmCcmxmdwM4QACJAADYbCULyI4SVeYdqv2KgQ
+  - CAACAgIAAxkBAAEGA5xjP0vQmMVJcHVkllTmqSVejw3goAACMQADYbCUL8JmTU5IRXf6KgQ
+  - CAACAgIAAxkBAAEGA4hjP0j_ZxcGkzUO9Q66kYElM2QmYQAC7AIAAiFTBAAB_bRifLIocgQqBA
+qr: # Which action execute on /start QR_ message. (You can create QR code with link to bot, ot encode NFC tag)
+  enable: true
+  cmd: "Включить подсветку"
