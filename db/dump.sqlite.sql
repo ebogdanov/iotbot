@@ -4,6 +4,7 @@ create table actions
         constraint actions_pk
             primary key autoincrement,
     user_id      integer           not null,
+    username     text              not null,
     cmd          text              not null,
     result       integer default 1 not null,
     execute_time int               not null,
@@ -38,7 +39,7 @@ create table groups
 create index groups_title_index
     on main.groups (title);
 
-insert into groups(title) values("admin");
+insert into groups(title) values('admin');
 
 create table invites
 (
